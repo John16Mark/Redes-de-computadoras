@@ -2,100 +2,150 @@
 #include <stdlib.h>
 
 typedef unsigned char byte;
+typedef unsigned short int nibble;
+
+void analizador(byte *T);
+void IP(byte *T);
+nibble checksum(byte T[], byte begin, byte end);
 
 int main() {
 
-    byte T[] = {
+    /*byte T[] = {
 		0x00, 0x14, 0xd1, 0xc2, 0x38, 0xbe, 0x00, 0x18, 0xe7, 0x33, 0x3d, 0xc3, 0x08, 0x00, 0x45, 0x00, 
 		0x00, 0x3c, 0x00, 0x32, 0x00, 0x00, 0x80, 0x01, 0xb5, 0x00, 0xc0, 0xa8, 0x02, 0x3c, 0xc0, 0xa8, 
 		0x00, 0x01, 0x63, 0x7D, 0x81, 0x38, 0xC8, 0x01, 0x01, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };*/
+
+    byte T[][2000] = {
+        {       // t2
+            0x00, 0x1f, 0x45, 0x9d, 0x1e, 0xa2, 0x00, 0x23, 0x8b, 0x46, 0xe9, 0xad, 0x08, 0x00, 0x46, 0x00, 
+            0x80, 0x42, 0x04, 0x55, 0x34, 0x11, 0x80, 0x11, 0x6b, 0xf0, 0x94, 0xcc, 0x39, 0xcb, 0x94, 0xcc, 
+            0x67, 0x02, 0xaa, 0xbb, 0xcc, 0xdd, 0x04, 0x0c, 0x00, 0x35, 0x00, 0x2e, 0x85, 0x7c, 0xe2, 0x1a, 
+            0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x77, 0x77, 0x77, 0x03, 0x69, 
+            0x73, 0x63, 0x05, 0x65, 0x73, 0x63, 0x6f, 0x6d, 0x03, 0x69, 0x70, 0x6e, 0x02, 0x6d, 0x78, 0x00, 
+            0x00, 0x1c, 0x00, 0x01
+        }, {   // t9
+            0x00, 0x1f, 0x45, 0x9d, 0x1e, 0xa2, 0x00, 0x23, 0x8b, 0x46, 0xe9, 0xad, 0x08, 0x00, 0x45, 0x10, 
+            0x00, 0x3c, 0x04, 0x57, 0x00, 0x00, 0x64, 0x01, 0x98, 0x25, 0x94, 0xcc, 0x39, 0xcb, 0x94, 0xcc, 
+            0x3a, 0xe1, 0x08, 0x00, 0x49, 0x5c, 0x03, 0x00, 0x01, 0x00, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 
+            0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 
+            0x77, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69
+        }, {   // t10
+            0x00, 0x1f, 0x45, 0x9d, 0x1e, 0xa2, 0x00, 0x23, 0x8b, 0x46, 0xe9, 0xad, 0x08, 0x00, 0x47, 0x08, 
+            0x80, 0x42, 0x04, 0x55, 0x34, 0x11, 0xc8, 0x11, 0x6b, 0xf0, 0x94, 0xcc, 0x39, 0xcb, 0x94, 0xcc, 
+            0x67, 0x02, 0x12, 0x34, 0x56, 0x78, 0x87, 0x65, 0x43, 0x21, 0x00, 0x2e, 0x85, 0x7c, 0xe2, 0x1a, 
+            0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x77, 0x77, 0x77, 0x03, 0x69, 
+            0x73, 0x63, 0x05, 0x65, 0x73, 0x63, 0x6f, 0x6d, 0x03, 0x69, 0x70, 0x6e, 0x02, 0x6d, 0x78, 0x00, 
+            0x00, 0x1c, 0x00, 0x01
+        }, {   // t11
+            0x02, 0xFF, 0x53, 0xC3, 0xE9, 0xAB, 0x00, 0xFF, 0x66, 0x7F, 0xD4, 0x3C, 0x08, 0x00, 0x45, 0x02, 
+            0x00, 0x30, 0x2C, 0x00, 0x40, 0x00, 0x80, 0x06, 0x4B, 0x74, 0xC0, 0xA8, 0x01, 0x02, 0xC0, 0xA8, 
+            0x01, 0x01, 0x04, 0x03, 0x00, 0x15, 0x00, 0x3B, 0xCF, 0x44, 0x00, 0x00, 0x00, 0x00, 0x70, 0x02, 
+            0x20, 0x00, 0x0C, 0x34, 0x00, 0x00, 0x02, 0x04, 0x05, 0xB4, 0x01, 0x01, 0x04, 0x02
+        }, {    // Trama construida
+            0x4d, 0x36, 0xe9, 0x72, 0xe3, 0x25, 0x00, 0x13, 0x49, 0x00, 0x01, 0x02, 0x08, 0x00, 0x48, 0x0a, 
+		    0x1c, 0xfc, 0x09, 0x00, 0x21, 0x72, 0x23, 0x06, 0x00, 0x00, 0xac, 0x1e, 0x64, 0x43, 0xac, 0x1e, 
+		    0xf2, 0x15, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x00, 0x00
+        }
     };
 
+    analizador(T[0]);
+    analizador(T[1]);
+    analizador(T[2]);
+    analizador(T[3]);
+    analizador(T[4]);
+
+    return 0;
+}
+
+void analizador(byte *T) {
+    printf("\n\n\033[92m  .:: Ethernet Header ::.\033[0m\n");
+    printf("\033[94mDestination MAC Address:\033[0m  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[0], T[1], T[2], T[3], T[4], T[5]);
+    printf("\033[94mSource MAC Address:\033[0m  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[6], T[7], T[8], T[9], T[10], T[11]);
+    printf("\033[94mType:\033[0m  ");
+    if((T[12]<<8|T[13]) == 0x0800) {
+        printf("IP\n");
+        IP(T);
+    } else if((T[12]<<8|T[13]) == 0x0806) {
+        printf("ARP\n");
+    } else if((T[12]<<8|T[13]) <= 1500) {
+        printf("LLC\n");
+    }
+
+}
+
+void IP(byte *T) {
     if((T[12]<<8|T[13]) != 0x0800) {
         printf("La trama no es IP");
         exit(0);
     }
 
-    printf("\033[92mCabecera IP\033[0m\n");
-    printf("\033[94mVersi%cn:\033[0m  %d\n", 162, T[14]>>4);
-    printf("\033[94mInternet Header Length:\033[0m  %d\n", T[14]&0x0f);
+    printf("\033[92m  .:: IP Header ::.\033[0m\n");
+    printf("\033[94mVersion:\033[0m  IPv%d\n", T[14]>>4);
+    printf("\033[94mInternet Header Length:\033[0m  %d bytes\n", (T[14]&0x0f)<<2);
     printf("\033[94mType of Service:\033[0m  \n");
-    printf("\033[96m  Precedence =\033[0m  %d\n", T[15]>>5);
-    printf("\033[96m  D =\033[0m  %d\n", (T[15]>>4)&1);
-    printf("\033[96m  T =\033[0m  %d\n", (T[15]>>3)&1);
-    printf("\033[96m  R =\033[0m  %d\n", (T[15]>>2)&1);
-    printf("\033[96m  C =\033[0m  %d\n", (T[15]>>1)&1);
-    printf("\033[96m  x =\033[0m  %d\n", T[15]&1);
+    printf("\033[96m  Precedence =\033[0m  %.3d\n", T[15]>>5);
+    if(T[15]&16)
+        printf("\033[96m  Minimize delay\n");
+    if(T[15]&8)
+        printf("\033[96m  Minimize throughout\n");
+    if(T[15]&4)
+        printf("\033[96m  Maximize reliability\n");
+    if(T[15]&2)
+        printf("\033[96m  Minimize cost\n");
 
-    printf("\033[94mTotal Length:\033[0m  %d\n", (T[16]<<8)|T[17]);
+    printf("\033[94mTotal Length:\033[0m  %d bytes\n", (T[16]<<8)|T[17]);
     printf("\033[94mIdentification:\033[0m  %d\n", (T[18]<<8)|T[19]);
 
     printf("\033[94mFlags:\033[0m  \n");
-    printf("\033[94mFragment Checksum:\033[0m  %d\n", ((T[20]&0x1f)<<8)|T[21]);
+    printf("\033[96m  Don't Fragment =\033[0m  %d\n", T[20]&0x40);
+    printf("\033[96m  More Fragment =\033[0m  %d\n", T[20]&0x20);
+    printf("\033[94mFragment Offset:\033[0m  %d\n", ((T[20]&0x1f)<<8)|T[21]);
 
     printf("\033[94mProtocol:\033[0m  ");
-    if(T[23] == 1) {
-        printf("ICMP\n");
-    } else if(T[23] == 2) {
-        printf("IGMP\n");
-    } else if(T[23] == 6) {
-        printf("TCP\n");
-    } else if(T[23] == 9) {
-        printf("IGRP\n");
-    } else if(T[23] == 17) {
-        printf("UDP\n");
-    } else if(T[23] == 47) {
-        printf("GRE\n");
-    } else if(T[23] == 50) {
-        printf("ESP\n");
-    } else if(T[23] == 51) {
-        printf("AH\n");
-    } else if(T[23] == 57) {
-        printf("SKIP\n");
-    } else if(T[23] == 88) {
-        printf("EIGRP\n");
-    } else if(T[23] == 89) {
-        printf("OSPF\n");
-    } else if(T[23] == 115) {
-        printf("L2TP\n");
-    } else {
-        printf("Otro\n");
+    switch (T[23])
+    {
+        case 1: printf("ICMP\n"); break;
+        case 2: printf("IGMP\n"); break;
+        case 6: printf("TCP\n"); break;
+        case 9: printf("IGRP\n"); break;
+        case 17: printf("UDP\n"); break;
+        case 47: printf("GRE\n"); break;
+        case 50: printf("ESP\n"); break;
+        case 51: printf("AH\n"); break;
+        case 57: printf("SKIP\n"); break;
+        case 88: printf("EIGRP\n"); break;
+        case 89: printf("OSPF\n"); break;
+        case 115: printf("L2TP\n"); break;
+        default: printf("Otro\n");
     }
 
-    printf("\033[94mHeader Checksum:\033[0m  %.4x\n", ((short int)T[24]<<8)|T[25]);
+    printf("\033[94mHeader Checksum:\033[0m  0x%.4x\n", ((short int)T[24]<<8)|T[25]);
     printf("\033[94mSource Address:\033[0m  %d.%d.%d.%d\n", T[26], T[27], T[28], T[29]);
     printf("\033[94mDestination Address:\033[0m  %d.%d.%d.%d\n", T[30], T[31], T[32], T[33]);
-    /*
-    printf("\033[92mProtocolo ARP\033[0m\n", 162);
-    printf("\033[94mHardware Addess Type:\033[0m\n  ");
-    if((T[14]<<8|T[15]) == 1) {
-        printf("Ethernet\n");
-    } else if((T[14]<<8|T[15]) == 6) {
-        printf("IEEE 802 LAN\n");
+    if(((T[14]&0x0f)<<2) > 20) {
+        printf("\033[94mOptions:\033[0m  ");
+        for(int i=34; i<(int)((T[14]&0x0f)<<2)+14; i++)
+            printf("0x%.x  ", T[i]);
+        printf("\n");
+    }
+    if(!checksum(T, 14, ((T[14]&0x0f)<<2)+14)) {
+        printf("ACK\n");
     } else {
-        printf("Otro\n");
+        printf("No hay integridad \033[94mChecksum:\033[0m  0x%.4x\n", checksum(T, 14, ((T[14]&0x0f)<<2)+14));
     }
+}
 
-    printf("\033[94mProtocol Addess Type:\033[0m\n  ");
-    if((T[16]<<8|T[17]) == 2048) {
-        printf("IPv4 (0x0800)\n");
-    } else {
-        printf("Otro\n");
+nibble checksum(byte T[], byte begin, byte end) {
+    int suma = 0;
+    for(unsigned char i=begin; i<end; i+=2) {
+        if(i == end-1) {
+            T[i+1] = 0;
+        }
+        suma += T[i]<<8 | T[i+1];
     }
-
-    printf("\033[94mHardware Address Length:\033[0m\n  %d bytes\n", T[18]);
-    printf("\033[94mProtocol Address Length:\033[0m\n  %d bytes\n", T[19]);
-    printf("\033[94mProtocol Addess Type:\033[0m\n  ");
-    if((T[20]<<8|T[21]) == 1) {
-        printf("Solicitud\n");
-    } else if ((T[20]<<8|T[21]) == 2) {
-        printf("Respuesta\n");
-    }
-    printf("\033[94mSource Hardware Address:\033[0m\n  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[22], T[23], T[24], T[25], T[26], T[27]);
-    printf("\033[94mSource Protocol Address:\033[0m\n  %d.%d.%d.%d\n", T[28], T[29], T[30], T[31]);
-    printf("\033[94mTarget Hardware Address:\033[0m\n  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[32], T[33], T[34], T[35], T[36], T[37]);
-    printf("\033[94mTarget Protocol Address:\033[0m\n  %d.%d.%d.%d\n", T[38], T[39], T[40], T[41]);
-    */
-    return 0;
+    suma += suma>>16;
+    suma = suma&0x0000FFFF;
+    return ~suma;
 }
