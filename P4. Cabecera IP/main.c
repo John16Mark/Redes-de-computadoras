@@ -4,7 +4,7 @@
 typedef unsigned char byte;
 typedef unsigned short int nibble;
 
-void analizador(byte *T);
+void Ethernet(byte *T);
 void IP(byte *T);
 nibble checksum(byte T[], byte begin, byte end);
 
@@ -50,16 +50,16 @@ int main() {
         }
     };
 
-    analizador(T[0]);
-    analizador(T[1]);
-    analizador(T[2]);
-    analizador(T[3]);
-    analizador(T[4]);
+    Ethernet(T[0]);
+    Ethernet(T[1]);
+    Ethernet(T[2]);
+    Ethernet(T[3]);
+    Ethernet(T[4]);
 
     return 0;
 }
 
-void analizador(byte *T) {
+void Ethernet(byte *T) {
     printf("\n\n\033[92m  .:: Ethernet Header ::.\033[0m\n");
     printf("\033[94mDestination MAC Address:\033[0m  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[0], T[1], T[2], T[3], T[4], T[5]);
     printf("\033[94mSource MAC Address:\033[0m  %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n", T[6], T[7], T[8], T[9], T[10], T[11]);
@@ -72,7 +72,6 @@ void analizador(byte *T) {
     } else if((T[12]<<8|T[13]) <= 1500) {
         printf("LLC\n");
     }
-
 }
 
 void IP(byte *T) {
